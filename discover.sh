@@ -58,7 +58,7 @@ echo "REMOVING DUPLICATES \e[32mFINISH\e[0m"
 ## LAUNCH LIVEHOSTS
 echo -e "\nRUNNING \e[31m[FILTERING THE BAD ONES]\e[0m"
 rm ./output/$1.live_subdomains.txt ||true
-cat ./output/$1.alldomains.txt | filter-resolved -c 100 > ./output/$1.live_subdomains.txt
+cat ./output/$1.alldomains.txt | filter-resolved -c 100 > ./output/$1.live_subdomains.log
 rm ./output/$1.alldomains.txt ||true
 rm ./output/$1.subfinder.txt ||true
 rm ./output/$1.dnsbuffer.txt ||true
@@ -82,7 +82,7 @@ rm ./output/$1.domain_ips.txt ||true
 echo -e "\nRUNNING \e[31m[FINDING OWNED ASN SUBNETS]\e[0m"
 cat ./output/$1.subnets.txt |while read ip ;do whois -h whois.cymru.com " -v $ip" |grep -i "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |cut -d '|' -f2 |awk '{$1=$1};1'; done > ./output/$1.asn.txt
 cat ./output/$1.asn.txt |while read ip ;do whois -h whois.radb.net -i origin -T route $(whois -h whois.radb.net $ip | grep origin: | cut -d ' ' -f 6 | head -1) | grep -w "route:" | awk '{print $NF}' ;done|sort -n >> ./output/$1.subnets.txt
-sort -u ./output/$1.subnets.txt > ./output/$1.live_subnets.txt
+sort -u ./output/$1.subnets.txt > ./output/$1.live_subnets.log
 rm ./output/$1.subnets.txt ||true
 rm ./output/$1.asn.txt ||true
 echo "FINDING OWNED ASN SUBNETS \e[32mFINISH\e[0m"
