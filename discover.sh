@@ -85,6 +85,7 @@ cat ./output/$1.asn.txt |while read ip ;do whois -h whois.radb.net -i origin -T 
 sort -u ./output/$1.subnets.txt > ./output/$1.live_subnets.log
 rm ./output/$1.subnets.txt ||true
 rm ./output/$1.asn.txt ||true
+find ./output -size  0 -print -delete
 echo "FINDING OWNED ASN SUBNETS \e[32mFINISH\e[0m"
 echo " "
 echo "output live_subnets.txt and live_subdomains.txt in ./output/$(echo pwd)."
