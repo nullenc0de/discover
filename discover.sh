@@ -52,7 +52,7 @@ echo "RUNNING SUBFINDER \e[32mFINISH\e[0m"
 
 ## REMOVING DUPLICATES
 echo -e "\nRUNNING \e[31m[REMOVING DUPLICATES]\e[0m"
-sort  ./output/*.txt | uniq > ./output/$1.alldomains.txt
+sort  ./output/$1.*.txt | uniq > ./output/$1.alldomains.txt
 echo "REMOVING DUPLICATES \e[32mFINISH\e[0m"
 
 ## LAUNCH LIVEHOSTS
