@@ -69,6 +69,7 @@ echo "RESOLVING SUBS TO IP ADDRESSES \e[32mFINISH\e[0m"
 
 echo -e "\nRUNNING \e[31m[FINDING REGISTERED SUBNETS]\e[0m"
 cat ./output/$1.domain_ips.txt |while read url; do curl -s http://networktools.nl/whois/$url |grep -i -B 6 "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |grep CIDR |cut -d : -f2 |tr , "\n"| awk '{$1=$1};1'; done |sort -u > ./output/$1.subnets.txt
+echo "LOOKING UP [$(cat ./output/$1.subnets.txt | wc -l)] ADDRESSES FOR ASSIGNED SUBNETS"
 echo "FINDING REGISTERED SUBNETS \e[32mFINISH\e[0m"
 rm ./output/$1.domain_ips.txt ||true
 
