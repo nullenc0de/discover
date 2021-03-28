@@ -32,12 +32,6 @@ assetfinder -subs-only $1 > ./output/$1.assetfinder.txt
 echo "FOUND SUBDOMAINS [$(cat ./output/$1.assetfinder.txt | wc -l)]"
 echo "RUNNING ASSETFINDER \e[32mFINISH\e[0m"
 
-## LAUNCH FINDOMAIN
-echo -e "\nRUNNING \e[31m[FINDOMAIN]\e[0m"
-findomain -t $1 -o ./output/$1
-echo "FOUND SUBDOMAINS [$(cat ./output/$1.txt | wc -l)]"
-echo "RUNNING FINDOMAIN \e[32mFINISH\e[0m"
-
 ## LAUNCH DNSBUFFER
 echo -e "\nRUNNING \e[31m[DNSBUFFEROVER]\e[0m"
 curl -s https://dns.bufferover.run/dns?q=.$1 | jq -r .FDNS_A[]|cut -d',' -f2 > ./output/$1.dnsbuffer.txt
@@ -62,7 +56,6 @@ cat ./output/$1.alldomains.txt | filter-resolved -c 100 > ./output/$1.live_subdo
 rm ./output/$1.alldomains.txt ||true
 rm ./output/$1.subfinder.txt ||true
 rm ./output/$1.dnsbuffer.txt ||true
-rm ./output/$1.txt ||true
 rm ./output/$1.assetfinder.txt ||true
 rm ./output/$1.amassactive.txt ||true
 
