@@ -51,7 +51,7 @@ echo "REMOVING DUPLICATES \e[32mFINISH\e[0m"
 
 ## LAUNCH LIVEHOSTS
 echo -e "\nRUNNING \e[31m[FILTERING THE BAD ONES]\e[0m"
-rm ./output/$1.live_subdomains.txt ||true
+rm ./output/$1.live_subdomains.log ||true
 cat ./output/$1.alldomains.txt | filter-resolved -c 100 > ./output/$1.live_subdomains.log
 rm ./output/$1.alldomains.txt ||true
 rm ./output/$1.subfinder.txt ||true
@@ -59,12 +59,12 @@ rm ./output/$1.dnsbuffer.txt ||true
 rm ./output/$1.assetfinder.txt ||true
 rm ./output/$1.amassactive.txt ||true
 
-echo "TOTAL GOOD SUBDOMAINS [$(cat ./output/$1.live_subdomains.txt | wc -l)]"
+echo "TOTAL GOOD SUBDOMAINS [$(cat ./output/$1.live_subdomains.log | wc -l)]"
 echo "FILTERING THE BAD ONES \e[32mFINISH\e[0m"
 
 ## LAUNCH LIVEHOSTS
 echo -e "\nRUNNING \e[31m[RESOLVING SUBS TO IP ADDRESSES]\e[0m"
-cat ./output/$1.live_subdomains.txt | while read resolved; do host -t A "$resolved" | awk '{print $NF}' | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'; done |sort -u > ./output/$1.domain_ips.txt
+cat ./output/$1.live_subdomains.log | while read resolved; do host -t A "$resolved" | awk '{print $NF}' | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'; done |sort -u > ./output/$1.domain_ips.txt
 echo "RESOLVING SUBS TO IP ADDRESSES \e[32mFINISH\e[0m"
 
 echo -e "\nRUNNING \e[31m[FINDING REGISTERED SUBNETS]\e[0m"
