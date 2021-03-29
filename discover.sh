@@ -85,7 +85,7 @@ rm ./output/$1.asn.txt 2> /dev/null
 echo "FINDING OWNED ASN SUBNETS \e[32mFINISH\e[0m"
 echo " "
 echo "FOUND [$(cat ./output/$1.live_subnets.log | wc -l)] SUBNETS IN ./output/$1.live_subnets.log AND [$(cat ./output/$1.live_subdomains.log | wc -l)] SUBDOMAINS in ./output/$1.live_subdomains.log."
-find ./output -size  0 -print -delete
+find ./output -size  0 -print -delete 2> /dev/null
 echo " "
 echo -e "\e[31m[FINISHED. HACK SAFELY]\e[0m"
 
