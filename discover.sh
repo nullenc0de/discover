@@ -28,19 +28,19 @@ echo "RUNNING AMASS \e[32mFINISH\e[0m"
 
 ## LAUNCH ASSETFINDER
 echo -e "\nRUNNING \e[31m[ASSETFINDER]\e[0m"
-xargs -n 1 -P 400 assetfinder -subs-only $1 > ./output/$1.assetfinder.txt
+assetfinder -subs-only $1 > ./output/$1.assetfinder.txt
 echo "FOUND SUBDOMAINS [$(cat ./output/$1.assetfinder.txt | wc -l)]"
 echo "RUNNING ASSETFINDER \e[32mFINISH\e[0m"
 
 ## LAUNCH DNSBUFFER
 echo -e "\nRUNNING \e[31m[DNSBUFFEROVER]\e[0m"
-xargs -n 1 -P 400 curl -s https://dns.bufferover.run/dns?q=.$1 | jq -r .FDNS_A[]|cut -d',' -f2 > ./output/$1.dnsbuffer.txt
+curl -s https://dns.bufferover.run/dns?q=.$1 | jq -r .FDNS_A[]|cut -d',' -f2 > ./output/$1.dnsbuffer.txt
 echo "FOUND SUBDOMAINS [$(cat ./output/$1.dnsbuffer.txt | wc -l)]"
 echo "RUNNING DNSBUFFER \e[32mFINISH\e[0m"
 
 ## LAUNCH SUBFINDER
 echo -e "\nRUNNING \e[31m[SUBFINDER]\e[0m"
-xargs -n 1 -P 400 subfinder -d $1 -o ./output/$1.subfinder.txt 
+subfinder -d $1 -o ./output/$1.subfinder.txt 
 echo "FOUND SUBDOMAINS [$(cat ./output/$1.subfinder.txt | wc -l)]"
 echo "RUNNING SUBFINDER \e[32mFINISH\e[0m"
 
@@ -64,7 +64,7 @@ echo "FILTERING THE BAD ONES \e[32mFINISH\e[0m"
 
 ## LAUNCH LIVEHOSTS
 echo -e "\nRUNNING \e[31m[RESOLVING SUBS TO IP ADDRESSES]\e[0m"
-cat ./output/$1.live_subdomains.log | while read resolved; do xargs -n 1 -P 400 host -t A "$resolved" | awk '{print $NF}' | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'; done |sort -u > ./output/$1.domain_ips.txt
+cat ./output/$1.live_subdomains.log | while read resolved; do host -t A "$resolved" | awk '{print $NF}' | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'; done |sort -u > ./output/$1.domain_ips.txt
 echo "RESOLVING SUBS TO IP ADDRESSES \e[32mFINISH\e[0m"
 
 echo " "
@@ -72,13 +72,13 @@ echo "NEED TO LOOK UP [$(cat ./output/$1.domain_ips.txt | wc -l)] ADDRESSES FOR 
 echo " "
 
 echo -e "\nRUNNING \e[31m[FINDING REGISTERED SUBNETS]\e[0m"
-cat ./output/$1.domain_ips.txt |while read url; do xargs -n 1 -P 400 curl -s http://networktools.nl/whois/$url |grep -i -B 6 "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |grep CIDR |cut -d : -f2 |tr , "\n"| awk '{$1=$1};1'; done |sort -u > ./output/$1.subnets.txt
+cat ./output/$1.domain_ips.txt |while read url; do curl -s http://networktools.nl/whois/$url |grep -i -B 6 "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |grep CIDR |cut -d : -f2 |tr , "\n"| awk '{$1=$1};1'; done |sort -u > ./output/$1.subnets.txt
 echo "FINDING REGISTERED SUBNETS \e[32mFINISH\e[0m"
 rm ./output/$1.domain_ips.txt ||true
 
 echo -e "\nRUNNING \e[31m[FINDING OWNED ASN SUBNETS]\e[0m"
-cat ./output/$1.subnets.txt |while read ip ;do xargs -n 1 -P 400 whois -h whois.cymru.com " -v $ip" |grep -i "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |cut -d '|' -f2 |awk '{$1=$1};1'; done > ./output/$1.asn.txt
-cat ./output/$1.asn.txt |while read ip ;do xargs -n 1 -P 400 whois -h whois.radb.net -i origin -T route $(whois -h whois.radb.net $ip | grep origin: | cut -d ' ' -f 6 | head -1) | grep -w "route:" | awk '{print $NF}' ;done|sort -n >> ./output/$1.subnets.txt
+cat ./output/$1.subnets.txt |while read ip ;do whois -h whois.cymru.com " -v $ip" |grep -i "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |cut -d '|' -f2 |awk '{$1=$1};1'; done > ./output/$1.asn.txt
+cat ./output/$1.asn.txt |while read ip ;do whois -h whois.radb.net -i origin -T route $(whois -h whois.radb.net $ip | grep origin: | cut -d ' ' -f 6 | head -1) | grep -w "route:" | awk '{print $NF}' ;done|sort -n >> ./output/$1.subnets.txt
 sort -u ./output/$1.subnets.txt > ./output/$1.live_subnets.log
 rm ./output/$1.subnets.txt ||true
 rm ./output/$1.asn.txt ||true
