@@ -64,7 +64,7 @@ echo "FILTERING THE BAD ONES \e[32mFINISH\e[0m"
 
 ## LAUNCH LIVEHOSTS
 echo -e "\nRUNNING \e[31m[RESOLVING SUBS TO IP ADDRESSES]\e[0m"
-cat ./output/$1.live_subdomains.log | while read resolved; do host -t A "$resolved" | awk '{print $NF}' | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'; done |sort -u > ./output/$1.domain_ips.txt
+cat ./output/$1.live_subdomains.log | xargs -n1 -P 100 -I% host -t A "$resolved"% | awk '{print $NF}' | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' |sort -u > ./output/$1.domain_ips.txt
 echo "RESOLVING SUBS TO IP ADDRESSES \e[32mFINISH\e[0m"
 
 echo " "
@@ -72,7 +72,7 @@ echo "NEED TO LOOK UP [$(cat ./output/$1.domain_ips.txt | wc -l)] ADDRESSES FOR 
 echo " "
 
 echo -e "\nRUNNING \e[31m[FINDING REGISTERED SUBNETS]\e[0m"
-cat ./output/$1.domain_ips.txt |while read url; do curl -s http://networktools.nl/whois/$url |grep -i -B 6 "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |grep CIDR |cut -d : -f2 |tr , "\n"| awk '{$1=$1};1'; done |sort -u > ./output/$1.subnets.txt
+cat ./output/$1.domain_ips.txt |xargs -n1 -P 1500 -I% curl -s http://networktools.nl/whois/$url% |grep -i -B 6 "$(echo $1 |cut -d '.' -f1 | rev |cut -c1-4 |rev)" |grep CIDR |cut -d : -f2 |tr , "\n"| awk '{$1=$1};1'; done |sort -u > ./output/$1.subnets.txt
 echo "FINDING REGISTERED SUBNETS \e[32mFINISH\e[0m"
 rm ./output/$1.domain_ips.txt ||true
 
