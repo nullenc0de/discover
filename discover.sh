@@ -22,7 +22,7 @@ mkdir ./output 2> /dev/null
 
 ## LAUNCH ACTIVE AMASS
 echo -e "\nRUNNING \e[31m[AMASS ACTIVE]\e[0m"
-amass enum -passive -d $1 -o ./output/$1.amassactive.txt  
+amass enum -config /root/config.ini -passive -d $1 -o ./output/$1.amassactive.txt
 echo "FOUND SUBDOMAINS [$(cat ./output/$1.amassactive.txt  | wc -l)]"
 echo "RUNNING AMASS \e[32mFINISH\e[0m"
 
@@ -40,7 +40,7 @@ echo "RUNNING DNSBUFFER \e[32mFINISH\e[0m"
 
 ## LAUNCH SUBFINDER
 echo -e "\nRUNNING \e[31m[SUBFINDER]\e[0m"
-subfinder -d $1 -o ./output/$1.subfinder.txt 
+subfinder -d $1 -o ./output/$1.subfinder.txt
 echo "FOUND SUBDOMAINS [$(cat ./output/$1.subfinder.txt | wc -l)]"
 echo "RUNNING SUBFINDER \e[32mFINISH\e[0m"
 
@@ -52,7 +52,10 @@ echo "REMOVING DUPLICATES \e[32mFINISH\e[0m"
 ## LAUNCH LIVEHOSTS
 echo -e "\nRUNNING \e[31m[FILTERING THE BAD ONES]\e[0m"
 rm ./output/$1.live_subdomains.log 2> /dev/null
-cat ./output/$1.alldomains.txt | filter-resolved -c 100 > ./output/$1.live_subdomains.log
+cat ./output/$1.alldomains.txt | filter-resolved -c 100 > ./output/$1.live_subdomains_wild.log
+cat ./output/$1.live_subdomains_wild.log |httpx |goverview probe -N -c 500 |sort -u -t';' -k2,14 |cut -d ';' -f1 > ./output/$1.httpx.log
+cat ./output/$1.live_subdomains_wild.log | dnsx -wd $1 > ./output/$1.live_subdomains.log
+rm ./output/$1.live_subdomains_wild.log
 rm ./output/$1.alldomains.txt 2> /dev/null
 rm ./output/$1.subfinder.txt 2> /dev/null
 rm ./output/$1.dnsbuffer.txt 2> /dev/null
@@ -83,7 +86,7 @@ rm ./output/$1.subnets.txt 2> /dev/null
 rm ./output/$1.asn.txt 2> /dev/null
 echo "FINDING OWNED ASN SUBNETS \e[32mFINISH\e[0m"
 echo " "
-echo -e "\x1B[01;91m FOUND [$(cat ./output/$1.live_subnets.log | wc -l)] SUBNETS IN ./output/$1.live_subnets.log AND [$(cat ./output/$1.live_subdomains.log | wc -l)] SUBDOMAINS in ./output/$1.live_subdomains.log. \x1B[0m"
+echo -e "\x1B[01;91m FOUND [$(cat ./output/$1.live_subnets.log | wc -l)] SUBNETS IN ./output/$1.live_subnets.log AND [$(cat ./output/$1.live_subdomains.log | wc -l)] SUBDOMAINS in ./output/$1.live_subdomains.log AND [$(cat ./output/$1.httpx.log | wc -l)] WEB APPS in ./output/$1.httpx.log. \x1B[0m"
 find ./output -size  0 -delete 2> /dev/null
 echo " "
 echo -e "\e[31m[FINISHED. HACK SAFELY]\e[0m"
